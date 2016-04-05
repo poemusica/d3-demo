@@ -16,7 +16,12 @@ var yscale = d3.scale.linear()
 			   .domain([0, data.length*0.25, data.length*0.5, data.length*0.75, data.length])
 			   .range(['red', 'orange', 'yellow', 'green', 'blue']);
 
-var tempColor;
+var tempColor
+	toolTip = d3.select('body').append('div')
+		.style('position', 'absolute')
+		.style('padding', '0 10px')
+		.style('background', 'white')
+		.style('opacity', 0);
 
 var chart = d3.select('#chart').append('svg')
 	.attr('width', width)
@@ -34,14 +39,19 @@ var chart = d3.select('#chart').append('svg')
 		.attr('y', height)
 		.on('mouseover', function(d){
 			tempColor = this.style.fill;
+			toolTip.transition()
+				.style('opacity', 0.9);
+			toolTip.style('left', (d3.event.pageX - 35)  + 'px')
+				.style('top', (d3.event.pageY - 30)  + 'px');
+			toolTip.html(d);
 			d3.select(this)
-				// .transition()
 				.style('opacity', 0.5)
 				.style('fill', 'purple');
 		})
 		.on('mouseout', function(d) {
+			toolTip.transition()
+				.style('opacity', 0);
 			d3.select(this)
-				// .transition().delay(500).duration(800)
 				.style('opacity', 1)
 				.style('fill', tempColor);
 		});

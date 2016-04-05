@@ -16,6 +16,8 @@ var yscale = d3.scale.linear()
 			   .domain([0, data.length*0.25, data.length*0.5, data.length*0.75, data.length])
 			   .range(['red', 'orange', 'yellow', 'green', 'blue']);
 
+var tempColor;
+
 d3.select('#chart').append('svg')
 	.attr('width', width)
 	.attr('height', height)
@@ -33,4 +35,15 @@ d3.select('#chart').append('svg')
 		})
 		.attr('y', function(d) {
 			return height - yscale(d);
+		})
+		.on('mouseover', function(d){
+			tempColor = this.style.fill;
+			d3.select(this)
+				.style('opacity', 0.5)
+				.style('fill', 'purple');
+		})
+		.on('mouseout', function(d) {
+			d3.select(this)
+				.style('opacity', 1)
+				.style('fill', tempColor);
 		});

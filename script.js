@@ -1,22 +1,27 @@
 var data = [],
-	width = 600,
-	height = 400;
+	margin = {top: 30, right: 30, bottom: 40, left: 50},
+	width = 600 - margin.right - margin.left,
+	height = 400 - margin.top - margin.bottom;
 
-for (var i = 0; i < 100; i++) {
-	data.push(Math.random());
+for (var i = 0; i < 50; i++) {
+	data.push(Math.floor(Math.random() * (50 - 1 + 1)) + 1);
 }
+
+data.sort(function(a, b) {
+	return a - b;
+});
 
 var yscale = d3.scale.linear()
 			   .domain([0, d3.max(data)])
 			   .range([0, height]),
 	xscale = d3.scale.ordinal()
 			   .domain(d3.range(0, data.length))
-			   .rangeBands([0, width]),
+			   .rangeBands([0, width], 0.2, 0),
 	colors = d3.scale.linear()
 			   .domain([0, data.length*0.25, data.length*0.5, data.length*0.75, data.length])
 			   .range(['red', 'orange', 'yellow', 'green', 'blue']);
 
-var tempColor
+var tempColor,
 	toolTip = d3.select('body').append('div')
 		.style('position', 'absolute')
 		.style('padding', '0 10px')
@@ -24,9 +29,11 @@ var tempColor
 		.style('opacity', 0);
 
 var chart = d3.select('#chart').append('svg')
-	.attr('width', width)
-	.attr('height', height)
 	.style('background', 'gray')
+	.attr('width', width + margin.right + margin.left)
+	.attr('height', height + margin.top + margin.bottom)
+	.append('g')
+	.attr('transform', 'translate(' + margin.left + ',' + margin.top +')')
 	.selectAll('rect').data(data).enter().append('rect')
 		.style('fill', function(d, i) {
 			return colors(i);
@@ -69,4 +76,33 @@ chart.transition()
 		return height - yscale(d);
 	});
 
-		
+var xAxis = d3.svg.axis()
+		.scale(xscale)
+		.orient('bottom')
+		.tickValues(xscale.domain().filter( function(d, i) {
+			return !(i % (data.length/5));
+		})),
+	xGuide = d3.select('svg').append('g')
+		.attr('transform', 'translate(' + margin.left + ',' + (height + margin.top) + ')');
+	yGuideScale = d3.scale.linear()
+		.domain([0, d3.max(data)])
+		.range([height, 0]),
+	yAxis = d3.svg.axis()
+		.scale(yGuideScale)
+		.orient('left')
+		.ticks(10),
+	yGuide = d3.select('svg').append('g')
+		.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+yAxis(yGuide);
+xAxis(xGuide);
+
+yGuide.selectAll('path')
+		.style({fill: 'none', stroke: 'black'});
+yGuide.selectAll('line')
+		.style({stroke: '#000'});
+xGuide.selectAll('path')
+		.style({fill: 'none', stroke: 'black'});
+xGuide.selectAll('line')
+		.style({stroke: '#000'});
+
